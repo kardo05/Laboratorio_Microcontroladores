@@ -45,28 +45,27 @@ ISR(TIMER0_OVF_vect) {
     if (contador_tiempo_tres_segundos >= 3){
       tiempo_tres_segundos = 1;
     }
-  }
+}
 
 
 // Configuracion interrupcion al presionar el boton B1/B2 
-ISR(INT0_vect)
-{
+ISR(INT0_vect){
+    B1_B2 = 1;
+}
+
+ISR(INT1_vect){
     B1_B2 = 1;
 }
 
 int main(void) {
-    estado_siguiente = estado_A;
-    estado = estado_siguiente;
+ //   estado_siguiente = estado_A;
+//    estado = estado_siguiente;
 
     // Configuración de puertos y pines
-    PORTB = 0b00000000;
-    PIND = 0b00000000;
-    PORTD = 0b00000000;
+  PORTB = 0b00000000;
 
-    DDRB = 0b01111111;
-    DDRD = 0b11110011;
+  PORTD = 0b00000000;
 
-    
     // GIMSK: General Interrupt Mask Register
     // PCMSK0: Pin Change Mask Register 0
     // Configuración de interrupciones externas para pines 6 y 7 (puerto D)
@@ -78,18 +77,33 @@ int main(void) {
     MCUCR |= (1 << ISC00) | (1 << ISC01); // Flanco creciente de INTO genera un pedido de interrupcion  
     MCUCR |= (1 << ISC10) | (1 << ISC11); // Flanco creciente de INT1 genera un pedido de interrupcion 
     
-    // Time/Counter Control Register 
-    TCCR0A = 0; // Clock A deshabilitado
-    TCCR0B = (1 << CS02) | (1 << CS00); //Clock B con escalamiento: clk_I/O / 1024 del prescaler
     
+    // Time/Counter Control Register 
+    TCCR0A = 0;// Registro TCCR2A inicializado en 0
+    TCCR0B = 0;// Registro TCCR2A inicializado en 0
+    TCCR0B |= (1 << CS02) | (1 << CS00); //Clock B con escalamiento: clk_I/O / 1024 del prescaler
+    
+    // Habilitar interrupciones globales
+    sei(); 
+    
+    TCNT0  = 0;// Contador inicializado en 0
+
+
     // Timer Mask Register
     TIMSK |= (1 << TOIE0); // Timer/Counter0 Overflow habilitado
 
+    DDRB |= (1 << VEHICULAR_ROJO) | (1 << VEHICULAR_VERDE); 
+    DDRD |= (1 << APEATONAL_ROJO) | (1 << APEATONAL_VERDE) | (1 << BPEATONAL_ROJO) | (1 << BPEATONAL_VERDE);
 
-    // Habilitar interrupciones globales
-    sei(); 
 
-    estado = estado_A
+
+    PORTB &= ~(1 << VEHICULAR_ROJO) & ~(1 << VEHICULAR_VERDE);
+    PORTD &= ~(1 << APEATONAL_ROJO) & ~(1 << APEATONAL_VERDE) & ~(1 << BPEATONAL_ROJO) & ~(1 << BPEATONAL_VERDE);
+
+
+    estado = estado_A;
+
+    B1_B2 = 0;
 
     // Loop infinito para la ejecucion de la maquina de estados
     while (1) {
@@ -109,72 +123,71 @@ void maquina_estados(){
   while (1) {
         switch (estado)
         {
-        case estado_A:
-          PORTD &= ~(1 << APEATONAL_VERDE) | ~(1 << BPEATONAL_VERDE); // luces verdes de los semaforos A y B peatonales se apagan
-          PORTD |= (1 << APEATONAL_ROJO) | (1 << BPEATONAL_ROJO); // luces rojas de los semaforos A y B peatonales se encienden
-          //Hay que agregar un delay de 1s entre los cambios de peatonal a vehicular
-          PORTB &= ~(1 << VEHICULAR_ROJO); // pin conectado a luz roja del semaforo vehicular se apaga
-          PORTB |= (1 << VEHICULAR_VERDE); // pin conectado a luz verde del semaforo vehicular se enciende
-          if(B1_B2 == 1){
-            contador = 0;
-            contador_tiempo_tres_segundos = 0;
-            tiempo_tres_segundos = 0;
-            estado = estado_B;
-          }
+          case estado_A:
+            PORTD &= ~(1 << APEATONAL_VERDE) | ~(1 << BPEATONAL_VERDE); // luces verdes de los semaforos A y B peatonales se apagan
+            PORTD |= (1 << APEATONAL_ROJO) | (1 << BPEATONAL_ROJO); // luces rojas de los semaforos A y B peatonales se encienden
+            PORTB &= ~(1 << VEHICULAR_ROJO); // pin conectado a luz roja del semaforo vehicular se apaga
+            PORTB |= (1 << VEHICULAR_VERDE); // pin conectado a luz verde del semaforo vehicular se enciende
+            if(B1_B2 == 1){
+              contador = 0;
+              contador_tiempo_tres_segundos = 0;
+              tiempo_tres_segundos = 0;
+              estado = estado_B;
+            }
+            break;
+
+          case estado_B:
+            // Parpadeo de la luz verde del semaforo vehicular
+            PORTB ^= (1 << VEHICULAR_VERDE);
+            if(tiempo_tres_segundos == 1){
+              PORTB &= ~(1 << VEHICULAR_VERDE);
+              PORTB |= (1 << VEHICULAR_ROJO);
+            if(contador_tiempo_tres_segundos == 4){
+              contador = 0;
+              contador_tiempo_diez_segundos = 0;
+              tiempo_diez_segundos = 0;
+              estado = estado_C;
+            }
+            }
           break;
 
-        case estado_B:
-          PORTB ^= (1 << VEHICULAR_VERDE); // Parpadeo de la luz verde del semaforo vehicular
-
-          if(tiempo_tres_segundos == 1){
-            PORTB &= ~(1 << VEHICULAR_VERDE);
-            PORTB |= (1 << VEHICULAR_ROJO);
-          if(contador_tiempo_tres_segundos == 4){
-            contador = 0;
-            contador_tiempo_diez_segundos = 0;
-            tiempo_diez_segundos = 0;
-            estado = estado_C;
-          }
-          }
-        break;
-
-        case estado_C:
-          PORTB &= ~(1 << VEHICULAR_ROJO) & ~(1 << VEHICULAR_VERDE);
-          PORTD &= ~(1 << APEATONAL_ROJO) & ~(1 << APEATONAL_VERDE) & ~(1 << BPEATONAL_ROJO) & ~(1 << BPEATONAL_VERDE);
-          PORTB |= (1 << VEHICULAR_ROJO);
-          PORTB &= ~(1 << VEHICULAR_VERDE);
-          PORTD &= ~(1 << APEATONAL_ROJO) & ~(1 << BPEATONAL_ROJO);
-          PORTD |= (1 << APEATONAL_VERDE) | (1 << BPEATONAL_VERDE);
-          if(tiempo2 == 1){
-            contador = 0;
-            contador_tiempo_tres_segundos = 0;
-            tiempo_tres_segundos = 0;
-            estado = estado_D;
-            B1_B2 = 0;
-            
-          }
-        break;
-
-        case estado_D:
-            PORTD ^= (1 << APEATONAL_VERDE);
-            PORTD ^= (1 << BPEATONAL_VERDE);
-
-          if(tiempo_diez_segundos == 1){
-            PORTD |= (1 << APEATONAL_VERDE);
-            PORTD |= (1 << BPEATONAL_VERDE);
-            PORTD &= ~(1 << APEATONAL_ROJO);
-            PORTD &= ~(1 << BPEATONAL_ROJO);
-          if(contador_tiempo_tres_segundos == 4){
+          case estado_C:
             PORTB &= ~(1 << VEHICULAR_ROJO) & ~(1 << VEHICULAR_VERDE);
             PORTD &= ~(1 << APEATONAL_ROJO) & ~(1 << APEATONAL_VERDE) & ~(1 << BPEATONAL_ROJO) & ~(1 << BPEATONAL_VERDE);
-            estado = estado_A;
-          }
-          }
-        break;
-
-        default:
-          estado = estado_A;
+            PORTB |= (1 << VEHICULAR_ROJO);
+            PORTB &= ~(1 << VEHICULAR_VERDE);
+            PORTD &= ~(1 << APEATONAL_ROJO) & ~(1 << BPEATONAL_ROJO);
+            PORTD |= (1 << APEATONAL_VERDE) | (1 << BPEATONAL_VERDE);
+            if(tiempo_diez_segundos == 1){
+              contador = 0;
+              contador_tiempo_tres_segundos = 0;
+              tiempo_tres_segundos = 0;
+              estado = estado_D;
+              B1_B2 = 0;
+              
+            }
           break;
+
+          case estado_D:
+              PORTD ^= (1 << APEATONAL_VERDE);
+              PORTD ^= (1 << BPEATONAL_VERDE);
+
+            if(tiempo_diez_segundos == 1){
+              PORTD |= (1 << APEATONAL_VERDE);
+              PORTD |= (1 << BPEATONAL_VERDE);
+              PORTD &= ~(1 << APEATONAL_ROJO);
+              PORTD &= ~(1 << BPEATONAL_ROJO);
+            if(contador_tiempo_tres_segundos == 4){
+              PORTB &= ~(1 << VEHICULAR_ROJO) & ~(1 << VEHICULAR_VERDE);
+              PORTD &= ~(1 << APEATONAL_ROJO) & ~(1 << APEATONAL_VERDE) & ~(1 << BPEATONAL_ROJO) & ~(1 << BPEATONAL_VERDE);
+              estado = estado_A;
+            }
+            }
+          break;
+
+          default:
+            estado = estado_A;
+            break;
         }
       }
 }
