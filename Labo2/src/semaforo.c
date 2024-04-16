@@ -75,7 +75,7 @@ int main(void) {
     // Bits de control el control de sensibilidad de interrupciones
     MCUCR &= ~(1 << ISC10); // Se inicializan las demas registros de interrupciones de INT0 Y INT1 a cero
     MCUCR &= ~(1 << ISC00); 
-    MCUCR |= (1 << ISC11) | (1 << ISC01); Flanco decreciente de INTO y INT1 genera un pedido de interrupcion
+    MCUCR |= (1 << ISC11) | (1 << ISC01); // Flanco decreciente de INTO y INT1 genera un pedido de interrupcion
     
     
     // Time/Counter Control Register 
@@ -139,17 +139,21 @@ void maquina_estados(){
 
           case estado_B:
             // Parpadeo de la luz verde del semaforo vehicular
-            PORTB ^= (1 << VEHICULAR_VERDE);
-            if(tiempo_tres_segundos == 1){
+            while(tiempo_tres_segundos == 0){
+              if(contador_tiempo_tres_segundos%2==0) PORTB &= ~(1 << VEHICULAR_VERDE);
+              else PORTB |= (1 << VEHICULAR_VERDE);
+            }
+            if(tiempo_tres_segundos == 1){ 
               PORTB &= ~(1 << VEHICULAR_VERDE);
               PORTB |= (1 << VEHICULAR_ROJO);
+            }
             if(contador_tiempo_tres_segundos == 4){
               contador = 0;
               contador_tiempo_diez_segundos = 0;
               tiempo_diez_segundos = 0;
               estado = estado_C;
             }
-            }
+            
           break;
 
           case estado_C:
@@ -172,20 +176,33 @@ void maquina_estados(){
 
           case estado_D:
             // Parpadeo de semaforos peatonales
-            PORTD ^= (1 << APEATONAL_VERDE);
-            PORTD ^= (1 << BPEATONAL_VERDE);
-
-            if(tiempo_diez_segundos == 1){
-              PORTD |= (1 << APEATONAL_VERDE);
-              PORTD |= (1 << BPEATONAL_VERDE);
-              PORTD &= ~(1 << APEATONAL_ROJO);
-              PORTD &= ~(1 << BPEATONAL_ROJO);
+            while (tiempo_tres_segundos == 0){
+                if (contador_tiempo_tres_segundos%2 == 0)
+                {
+                  PORTD &= ~(1 << APEATONAL_VERDE);
+                  PORTD &= ~(1 << BPEATONAL_VERDE);
+                }
+                else{
+                  PORTD |= (1 << APEATONAL_VERDE);
+                  PORTD |= (1 << BPEATONAL_VERDE);
+                }
+                
+                
+            }
+            if(tiempo_tres_segundos == 1){
+              
+            PORTD |= (1 << APEATONAL_VERDE);
+            PORTD |= (1 << BPEATONAL_VERDE);
+              
+            PORTD &= ~(1 << APEATONAL_ROJO);
+            PORTD &= ~(1 << BPEATONAL_ROJO);
+            }
             if(contador_tiempo_tres_segundos == 4){
               PORTB &= ~(1 << VEHICULAR_ROJO) & ~(1 << VEHICULAR_VERDE);
               PORTD &= ~(1 << APEATONAL_ROJO) & ~(1 << APEATONAL_VERDE) & ~(1 << BPEATONAL_ROJO) & ~(1 << BPEATONAL_VERDE);
               estado = estado_A;
             }
-            }
+            
           break;
 
           default:
