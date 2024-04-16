@@ -58,8 +58,7 @@ ISR(INT1_vect){
 }
 
 int main(void) {
- //   estado_siguiente = estado_A;
-//    estado = estado_siguiente;
+
 
     // Configuración de puertos y pines
   PORTB = 0b00000000;
@@ -74,8 +73,9 @@ int main(void) {
 
     // MCUCR: Micro Controller Units (MCU) Control Register
     // Bits de control el control de sensibilidad de interrupciones
-    MCUCR |= (1 << ISC00) | (1 << ISC01); // Flanco creciente de INTO genera un pedido de interrupcion  
-    MCUCR |= (1 << ISC10) | (1 << ISC11); // Flanco creciente de INT1 genera un pedido de interrupcion 
+    MCUCR &= ~(1 << ISC10); // Se inicializan las demas registros de interrupciones de INT0 Y INT1 a cero
+    MCUCR &= ~(1 << ISC00); 
+    MCUCR |= (1 << ISC11) | (1 << ISC01); Flanco decreciente de INTO y INT1 genera un pedido de interrupcion
     
     
     // Time/Counter Control Register 
@@ -124,6 +124,7 @@ void maquina_estados(){
         switch (estado)
         {
           case estado_A:
+            // Luz vehicular en verde y peatonales en rojo
             PORTD &= ~(1 << APEATONAL_VERDE) | ~(1 << BPEATONAL_VERDE); // luces verdes de los semaforos A y B peatonales se apagan
             PORTD |= (1 << APEATONAL_ROJO) | (1 << BPEATONAL_ROJO); // luces rojas de los semaforos A y B peatonales se encienden
             PORTB &= ~(1 << VEHICULAR_ROJO); // pin conectado a luz roja del semaforo vehicular se apaga
@@ -152,6 +153,7 @@ void maquina_estados(){
           break;
 
           case estado_C:
+            // Luz de semaforo vehicular a rojo y semaforos peatonales a verde
             PORTB &= ~(1 << VEHICULAR_ROJO) & ~(1 << VEHICULAR_VERDE);
             PORTD &= ~(1 << APEATONAL_ROJO) & ~(1 << APEATONAL_VERDE) & ~(1 << BPEATONAL_ROJO) & ~(1 << BPEATONAL_VERDE);
             PORTB |= (1 << VEHICULAR_ROJO);
@@ -169,8 +171,9 @@ void maquina_estados(){
           break;
 
           case estado_D:
-              PORTD ^= (1 << APEATONAL_VERDE);
-              PORTD ^= (1 << BPEATONAL_VERDE);
+            // Parpadeo de semaforos peatonales
+            PORTD ^= (1 << APEATONAL_VERDE);
+            PORTD ^= (1 << BPEATONAL_VERDE);
 
             if(tiempo_diez_segundos == 1){
               PORTD |= (1 << APEATONAL_VERDE);
