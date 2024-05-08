@@ -1,0 +1,11 @@
+{
+  "additionalFiles": "../..,../..,../..,../..",
+  "builtInToolsFolders": "",
+  "compiler.optimization_flags": "",
+  "customBuildProperties": "",
+  "fqbn": "arduino:avr:uno",
+  "hardwareFolders": "/home/wilberahr/.arduino15/packages",
+  "otherLibrariesFolders": "/home/wilberahr/Arduino/libraries",
+  "runtime.ide.version": "10607",
+  "sketchLocation": "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora"
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/home/wilberahr/.arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "/home/wilberahr/.arduino15/packages/arduino/hardware/avr/1.8.6/variants/standard"
+  },
+  {
+    "Sourcefile": "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/build/sketch/incubadora.ino.cpp",
+    "Include": "PCD8544.h",
+    "Includepath": "/home/wilberahr/Arduino/libraries/PCD8544"
+  },
+  {
+    "Sourcefile": "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/build/sketch/incubadora.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/build/sketch/pid.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/build/sketch/simPlanta.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/wilberahr/Arduino/libraries/PCD8544/PCD8544.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "/home/wilberahr/Arduino/libraries/PCD8544/charset.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]

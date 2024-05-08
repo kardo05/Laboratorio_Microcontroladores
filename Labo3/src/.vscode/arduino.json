@@ -1,0 +1,5 @@
+{
+    "sketch": "incubadora/incubadora.ino",
+    "output": "build",
+    "board": "arduino:avr:uno"
+}

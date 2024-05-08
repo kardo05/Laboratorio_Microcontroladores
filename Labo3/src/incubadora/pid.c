@@ -12,7 +12,7 @@ void PIDControlador_Init (PIDControlador *pid){
 
 }
   
-double PIDControlador_Update(PIDControlador *pid, double set_point, double medicion) {
+float PIDControlador_Update(PIDControlador *pid, float set_point, float medicion) {
 
 
     //Leer entrada
@@ -23,7 +23,7 @@ double PIDControlador_Update(PIDControlador *pid, double set_point, double medic
     pid->integral = pid->integral + pid->error ;
     //Calcular la derivada
     pid->derivada = pid->error - pid->ultimo_error ;
-    //Cauclar variable de control
+    //Calcular variable de control
     pid->var_control = (pid->Kp * pid->error ) + ( pid->Ki * pid->integral ) + (pid->Kd * pid->derivada ) ;
     //Acotar variable de control
     if( pid->var_control > 255){
@@ -36,7 +36,7 @@ double PIDControlador_Update(PIDControlador *pid, double set_point, double medic
         }
     }
     pid->ultimo_error = pid->error; 
-        
+    return pid->var_control;    
 }
 
     
