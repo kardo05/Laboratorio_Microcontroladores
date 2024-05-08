@@ -2,14 +2,14 @@
 #include "pid.h"
     
   
-void PIDControlador_Init (PIDControlador *pid){
+void PIDControlador_Init(PIDControlador *pid){
 
     pid->integral = 0.0;
     pid->ultimo_error = 0.0;
     pid->derivada = 0.0;
-    pid->posicion_actual = 0.0f;
+    pid->posicion_actual = 0.0;
 
-    pid->var_control = 0.0f;
+    pid->var_control = 0.0;
 
 }
   

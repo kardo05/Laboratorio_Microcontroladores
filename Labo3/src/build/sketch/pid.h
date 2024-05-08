@@ -3,7 +3,7 @@
 #define PID_CONTROLADOR_H
 
 
-typedef struct {
+struct pid{
 
     float Kp;
     float Ki;
@@ -18,7 +18,10 @@ typedef struct {
     float ultimo_error;
 
 
-}PIDControlador;
+};
+
+typedef pid PIDControlador;
+
 
 void PIDControlador_Init(PIDControlador *pid);
 float PIDControlador_Update(PIDControlador *pid, float setpoint, float posicion_actual);
