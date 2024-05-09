@@ -46,7 +46,7 @@ Circuit Id: Switch-5
 
 Unique  Id: Potentiometer-6: 
 Circuit Id: Potentiometer-6
-<item valLabely="-20" labelrot="0" valLabRot="0" itemtype="Potentiometer" Resistance="1" boardPos="-1e+6,-1e+6" labelx="-16" x="28" Show_res="true" vflip="1" mainComp="false" objectName="Potentiometer-6" circRot="6.9527020743019e-310" y="-16" rotation="90" valLabelx="10" Unit=" kΩ" circPos="0,0" labely="-40" Value_Ohm="920" boardRot="-1e+6" hflip="1" id="Potentiometer-6" Show_id="false"/>
+<item valLabely="-20" labelrot="0" valLabRot="0" itemtype="Potentiometer" Resistance="1" boardPos="-1e+6,-1e+6" labelx="-16" x="28" Show_res="true" vflip="1" mainComp="false" objectName="Potentiometer-6" circRot="6.9527020743019e-310" y="-16" rotation="90" valLabelx="10" Unit=" kΩ" circPos="0,0" labely="-40" Value_Ohm="921" boardRot="-1e+6" hflip="1" id="Potentiometer-6" Show_id="false"/>
 
 Unique  Id: Fixed Voltage-8: 
 Circuit Id: Fixed Voltage-8
@@ -127,6 +127,10 @@ Circuit Id: Led-63
 Unique  Id: Led-64: 
 Circuit Id: Led-64
 <item valLabely="0" labelrot="0" valLabRot="0" itemtype="Led" Color="3" Resistance="0.6" boardPos="-1e+6,-1e+6" labelx="-16" x="-352" Grounded="false" MaxCurrent="0.03" vflip="1" mainComp="false" objectName="Led-64" circRot="0" y="-40" rotation="90" valLabelx="0" circPos="0,0" labely="-24" boardRot="-1e+6" hflip="1" id="Led-64" Show_id="false" Threshold="2.4"/>
+
+Unique  Id: SerialPort-102: 
+Circuit Id: SerialPort-102
+<item valLabely="0" labelrot="0" valLabRot="0" itemtype="SerialPort" Mcu_Uart="1" Auto_Open="false" Mcu_Id="Arduino Uno-1" boardPos="-1e+6,-1e+6" labelx="-34" x="-240" FlowControl="0" BaudRate="9600" vflip="1" Port_Name="" mainComp="false" objectName="SerialPort-102" circRot="-1.931402135782828e-181" y="-288" DataBits="8" rotation="0" valLabelx="0" StopBits="1" circPos="0,0" labely="-20" boardRot="-1e+6" Parity="0" hflip="1" id="SerialPort-102" Show_id="false"/>
 
 Unique  Id: Connector-7: 
 Circuit Id: Connector-7
