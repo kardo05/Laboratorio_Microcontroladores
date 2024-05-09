@@ -36,6 +36,7 @@ float setpoint;
 float temperatura;
 float temperatura_ambiente = 25;
 float senalControl;
+float var_referencia;
 
 int baudrate = 9600;
 int potenciometro = A0;
@@ -56,24 +57,24 @@ int analogValue1;
 int analogValue2;
 
 
-#line 57 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 58 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void setup();
-#line 82 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 83 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void loop();
-#line 115 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 148 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 float PIDControlador_Update(PIDControlador *pid, float set_point, float medicion);
-#line 142 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 175 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 float simPlanta(float Q);
-#line 164 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 197 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void desplegarDatosPantallaLCD(float temperaturaOperacion, float senalControl, float temperaturaSensada);
-#line 180 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 213 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void enviarDatosUSART(float temperaturaOperacion, float senalControl, float temperaturaSensada);
-#line 57 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 58 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void setup()
 {
-	pid->Kp = 5;
-    pid->Ki = 2;
-    pid->Kd = 1;
+	pid->Kp = 10;
+    pid->Ki = 1;
+    pid->Kd = 0;
 
     pinMode(sclk, OUTPUT);
     pinMode(sdin, OUTPUT); 
@@ -91,7 +92,7 @@ void setup()
     pantalla.begin();
     Serial.begin(baudrate);
     setpoint = analogRead(potenciometro)*12/1000 +30;
-    temperatura = PIDControlador_Update(pid, setpoint, temperatura_ambiente);
+    senalControl = PIDControlador_Update(pid, setpoint, temperatura_ambiente);
 }
 
 void loop()
@@ -100,11 +101,41 @@ void loop()
     analogValue2 = analogRead(switchSerial);
 
     pantalla.clear();
-    float TempWatts = temperatura * 20.0 / 255;
+
+    float TempWatts = senalControl * 20.0 / 255;
     temperatura = simPlanta(TempWatts);
-    setpoint = analogRead(potenciometro)*12/1000 +30;
-    senalControl = PIDControlador_Update(pid, setpoint, temperatura)/255*80;
+    var_referencia = analogRead(potenciometro)*12/1000 +30;
+
+    if(var_referencia!= setpoint){
+        setpoint = var_referencia;
+        senalControl = PIDControlador_Update(pid, setpoint, temperatura);
+    }
+
+
     
+    if(temperatura < 30){
+        digitalWrite(BLUE, HIGH);
+        digitalWrite(GREEN, LOW);
+        digitalWrite(RED, LOW);
+    }else{
+        if(temperatura > 42){
+            digitalWrite(RED, HIGH);
+            digitalWrite(BLUE, LOW);
+            digitalWrite(GREEN, LOW);
+        }else{
+            if(temperatura <=42 && temperatura>=30){
+                digitalWrite(GREEN, HIGH); 
+                digitalWrite(BLUE, LOW); 
+                digitalWrite(RED, LOW);
+            }
+           
+        }
+    }
+    
+    
+   
+    
+
     if(analogValue1 != 0){
         desplegarDatosPantallaLCD(setpoint,senalControl,temperatura);
     }
@@ -113,7 +144,9 @@ void loop()
         enviarDatosUSART(setpoint,senalControl,temperatura);
     }
     
-    delay(100);
+
+
+    delay(10);
 }
   
 void PIDControlador_Init(PIDControlador *pid){
@@ -162,7 +195,7 @@ float simPlanta(float Q) {
     float area = 1e-4; // m2 area por conveccion
     float masa = 10 ; // g
     float Tamb = 25; // Temperatura ambiente en C
-    float T = Tamb; // Temperatura en C
+    static float T = Tamb; // Temperatura en C
     static uint32_t last = 0;
     uint32_t interval = 100; // ms
 
@@ -183,7 +216,7 @@ void desplegarDatosPantallaLCD(float temperaturaOperacion, float senalControl, f
     pantalla.print(" *C");
     pantalla.setCursor(0,1);
     pantalla.print("Senal: ");
-    pantalla.print(senalControl);
+    pantalla.print(senalControl*20/255);
     pantalla.print("*C");  
     pantalla.setCursor(0, 2);
     pantalla.print("T_s: ");

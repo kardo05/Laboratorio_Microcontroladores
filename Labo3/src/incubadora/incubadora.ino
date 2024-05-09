@@ -34,6 +34,7 @@ float setpoint;
 float temperatura;
 float temperatura_ambiente = 25;
 float senalControl;
+float var_referencia;
 
 int baudrate = 9600;
 int potenciometro = A0;
@@ -56,9 +57,9 @@ int analogValue2;
 
 void setup()
 {
-	pid->Kp = 5;
-    pid->Ki = 2;
-    pid->Kd = 1;
+	pid->Kp = 10;
+    pid->Ki = 1;
+    pid->Kd = 0;
 
     pinMode(sclk, OUTPUT);
     pinMode(sdin, OUTPUT); 
@@ -76,7 +77,7 @@ void setup()
     pantalla.begin();
     Serial.begin(baudrate);
     setpoint = analogRead(potenciometro)*12/1000 +30;
-    temperatura = PIDControlador_Update(pid, setpoint, temperatura_ambiente);
+    senalControl = PIDControlador_Update(pid, setpoint, temperatura_ambiente);
 }
 
 void loop()
@@ -85,9 +86,17 @@ void loop()
     analogValue2 = analogRead(switchSerial);
 
     pantalla.clear();
-    float TempWatts = temperatura * 20.0 / 255;
+
+    float TempWatts = senalControl * 20.0 / 255;
     temperatura = simPlanta(TempWatts);
-    setpoint = analogRead(potenciometro)*12/1000 +30;
+    var_referencia = analogRead(potenciometro)*12/1000 +30;
+
+    if(var_referencia!= setpoint){
+        setpoint = var_referencia;
+        senalControl = PIDControlador_Update(pid, setpoint, temperatura);
+    }
+
+
     
     if(temperatura < 30){
         digitalWrite(BLUE, HIGH);
@@ -99,14 +108,17 @@ void loop()
             digitalWrite(BLUE, LOW);
             digitalWrite(GREEN, LOW);
         }else{
-            digitalWrite(GREEN, HIGH); 
-            digitalWrite(BLUE, LOW); 
-            digitalWrite(RED, LOW);
+            if(temperatura <=42 && temperatura>=30){
+                digitalWrite(GREEN, HIGH); 
+                digitalWrite(BLUE, LOW); 
+                digitalWrite(RED, LOW);
+            }
+           
         }
     }
     
     
-    senalControl = PIDControlador_Update(pid, setpoint, temperatura);
+   
     
 
     if(analogValue1 != 0){
@@ -117,7 +129,9 @@ void loop()
         enviarDatosUSART(setpoint,senalControl,temperatura);
     }
     
-    delay(100);
+
+
+    delay(10);
 }
   
 void PIDControlador_Init(PIDControlador *pid){
@@ -166,7 +180,7 @@ float simPlanta(float Q) {
     float area = 1e-4; // m2 area por conveccion
     float masa = 10 ; // g
     float Tamb = 25; // Temperatura ambiente en C
-    float T = Tamb; // Temperatura en C
+    static float T = Tamb; // Temperatura en C
     static uint32_t last = 0;
     uint32_t interval = 100; // ms
 
@@ -187,7 +201,7 @@ void desplegarDatosPantallaLCD(float temperaturaOperacion, float senalControl, f
     pantalla.print(" *C");
     pantalla.setCursor(0,1);
     pantalla.print("Senal: ");
-    pantalla.print(senalControl);
+    pantalla.print(senalControl*20/255);
     pantalla.print("*C");  
     pantalla.setCursor(0, 2);
     pantalla.print("T_s: ");
