@@ -2,7 +2,7 @@
 #line 1 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 #include <PCD8544.h>
 
-//#include "simPlanta.h"
+
 
 struct PIDControlador{
 
@@ -28,42 +28,64 @@ float PIDControlador_Update(PIDControlador *pid, float setpoint, float posicion_
 
 PCD8544 pantalla;
 PIDControlador controlador;
-<<<<<<< HEAD
-int verde      = 11;
-int azul       = 12;
-int rojo       = 13;
-potenciometro  = 0;
-potenciometro1 = 0;
-int pot_pin    = A0;
-int cambio     = 8;
-int transistor = 9;
-float Kp       = 2;
-float Ki       = 5;
-float kd       = 1;
-=======
 PIDControlador *pid = &controlador;
 
 
 
->>>>>>> 7b812936a77da2997442de154e5016aa2894186d
 float setpoint;
 float temperatura;
 float temperatura_ambiente = 25;
+float senalControl;
 
 int baudrate = 9600;
 int potenciometro = A0;
+int switchSerial = A5;
+int switchPantalla = A4;
+
+int sclk = 3;
+int sdin = 4;
+int dc = 5;
+int reset = 6;
+int sce = 7;
+
+int BLUE = 10;
+int RED =  8;
+int GREEN = 9;
+
+int analogValue1;
+int analogValue2;
 
 
-#line 55 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 57 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void setup();
-#line 68 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 82 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void loop();
-#line 55 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 115 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+float PIDControlador_Update(PIDControlador *pid, float set_point, float medicion);
+#line 142 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+float simPlanta(float Q);
+#line 164 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+void desplegarDatosPantallaLCD(float temperaturaOperacion, float senalControl, float temperaturaSensada);
+#line 180 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+void enviarDatosUSART(float temperaturaOperacion, float senalControl, float temperaturaSensada);
+#line 57 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void setup()
 {
-	pid->Kp = 1;
-    pid->Ki = 1;
+	pid->Kp = 5;
+    pid->Ki = 2;
     pid->Kd = 1;
+
+    pinMode(sclk, OUTPUT);
+    pinMode(sdin, OUTPUT); 
+    pinMode(dc, OUTPUT); 
+    pinMode(reset, OUTPUT);  
+    pinMode(sce, OUTPUT); 
+    pinMode(BLUE, OUTPUT); 
+    pinMode(RED, OUTPUT);
+    pinMode(GREEN, INPUT);
+
+    analogValue1 =0;
+    analogValue2 =0;
 
     PIDControlador_Init(pid);
     pantalla.begin();
@@ -74,61 +96,25 @@ void setup()
 
 void loop()
 {
-	pantalla.clear();
+	analogValue1 = analogRead(switchPantalla);
+    analogValue2 = analogRead(switchSerial);
+
+    pantalla.clear();
     float TempWatts = temperatura * 20.0 / 255;
     temperatura = simPlanta(TempWatts);
-<<<<<<< HEAD
-    temperatura = PIDControlador_Update(&controlador, setpoint, temperatura);
-    float senal = 1;
-    potenciometro = analogRead(pot_pin)*12/1000 +30;
-    pottenciometro1= (potenciometro-30)/12*255;
-
-     input=temp;
-    if (setpoint != potenciometro){
-    setpoint=potenciometro;     
-    }
-    senal=output/255*80;
-    analogWrite(transistor, output);
-    lcd.setCursor(0, 0);
-    lcd.print("T_o: ");
-    lcd.print(potenciometro);
-    lcd.print(" *C");
-    lcd.setCursor(0,1);
-    lcd.print("Senal: ");
-    lcd.print(senal);
-    lcd.print("*C");  
-    lcd.setCursor(0, 2);
-    lcd.print("T_s: ");
-    lcd.print(temp);
-    lcd.print(" *C ");    
-=======
     setpoint = analogRead(potenciometro)*12/1000 +30;
-    temperatura = PIDControlador_Update(pid, setpoint, temperatura);
+    senalControl = PIDControlador_Update(pid, setpoint, temperatura)/255*80;
     
->>>>>>> 7b812936a77da2997442de154e5016aa2894186d
+    if(analogValue1 != 0){
+        desplegarDatosPantallaLCD(setpoint,senalControl,temperatura);
+    }
 
-    if (temp <= 30){
-     digitalWrite(azul, HIGH);
+    if(analogValue2 != 0){
+        enviarDatosUSART(setpoint,senalControl,temperatura);
     }
-    else {
-        digitalWrite(azul, LOW);
-    }
-    if (temp >= 42){
-        digitalWrite(rojo, HIGH);
-    }
-    else {
-        digitalWrite(rojo, LOW);
-    }
-    if (30 <= temp <= 42){
-        digitalWrite(verde, HIGH);
-    }
-    else {
-        digitalWrite(verde, LOW);
-    }
+    
+    delay(100);
 }
-<<<<<<< HEAD
-    delay(2000);
-=======
   
 void PIDControlador_Init(PIDControlador *pid){
 
@@ -188,6 +174,37 @@ float simPlanta(float Q) {
 
     return T;
 }
-    
->>>>>>> 7b812936a77da2997442de154e5016aa2894186d
 
+
+void desplegarDatosPantallaLCD(float temperaturaOperacion, float senalControl, float temperaturaSensada){
+    pantalla.setCursor(0, 0);
+    pantalla.print("T_o: ");
+    pantalla.print(temperaturaOperacion);
+    pantalla.print(" *C");
+    pantalla.setCursor(0,1);
+    pantalla.print("Senal: ");
+    pantalla.print(senalControl);
+    pantalla.print("*C");  
+    pantalla.setCursor(0, 2);
+    pantalla.print("T_s: ");
+    pantalla.print(temperaturaSensada);
+    pantalla.print(" *C "); 
+    pantalla.print(" %\t");
+}
+
+void enviarDatosUSART(float temperaturaOperacion, float senalControl, float temperaturaSensada){
+
+    if(Serial.available()<0){
+    
+        Serial.print("T_o: ");
+        Serial.print(temperaturaOperacion);
+        Serial.println(" *C");
+        Serial.print("Senal: ");
+        Serial.print(senalControl);
+        Serial.println("*C");
+        Serial.print("T_s: ");
+        Serial.print(temperaturaSensada);
+        Serial.println(" *C "); 
+    
+    }
+}

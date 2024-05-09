@@ -50,11 +50,14 @@ int BLUE = 10;
 int RED =  8;
 int GREEN = 9;
 
+int analogValue1;
+int analogValue2;
+
 
 void setup()
 {
-	pid->Kp = 1;
-    pid->Ki = 1;
+	pid->Kp = 5;
+    pid->Ki = 2;
     pid->Kd = 1;
 
     pinMode(sclk, OUTPUT);
@@ -66,6 +69,9 @@ void setup()
     pinMode(RED, OUTPUT);
     pinMode(GREEN, INPUT);
 
+    analogValue1 =0;
+    analogValue2 =0;
+
     PIDControlador_Init(pid);
     pantalla.begin();
     Serial.begin(baudrate);
@@ -75,14 +81,43 @@ void setup()
 
 void loop()
 {
-	pantalla.clear();
+	analogValue1 = analogRead(switchPantalla);
+    analogValue2 = analogRead(switchSerial);
+
+    pantalla.clear();
     float TempWatts = temperatura * 20.0 / 255;
     temperatura = simPlanta(TempWatts);
     setpoint = analogRead(potenciometro)*12/1000 +30;
-    senalControl = PIDControlador_Update(pid, setpoint, temperatura)/255*80;
-    desplegarDatosPantallaLCD(setpoint,senalControl,temperatura);
-    enviarDatosUSART(setpoint,senalControl,temperatura);
-    delay(10);
+    
+    if(temperatura < 30){
+        digitalWrite(BLUE, HIGH);
+        digitalWrite(GREEN, LOW);
+        digitalWrite(RED, LOW);
+    }else{
+        if(temperatura > 42){
+            digitalWrite(RED, HIGH);
+            digitalWrite(BLUE, LOW);
+            digitalWrite(GREEN, LOW);
+        }else{
+            digitalWrite(GREEN, HIGH); 
+            digitalWrite(BLUE, LOW); 
+            digitalWrite(RED, LOW);
+        }
+    }
+    
+    
+    senalControl = PIDControlador_Update(pid, setpoint, temperatura);
+    
+
+    if(analogValue1 != 0){
+        desplegarDatosPantallaLCD(setpoint,senalControl,temperatura);
+    }
+
+    if(analogValue2 != 0){
+        enviarDatosUSART(setpoint,senalControl,temperatura);
+    }
+    
+    delay(100);
 }
   
 void PIDControlador_Init(PIDControlador *pid){
