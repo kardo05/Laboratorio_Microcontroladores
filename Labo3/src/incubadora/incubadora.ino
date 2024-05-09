@@ -1,6 +1,6 @@
 #include <PCD8544.h>
 
-//#include "simPlanta.h"
+
 
 struct PIDControlador{
 
@@ -37,6 +37,18 @@ float senalControl;
 
 int baudrate = 9600;
 int potenciometro = A0;
+int switchSerial = A5;
+int switchPantalla = A4;
+
+int sclk = 3;
+int sdin = 4;
+int dc = 5;
+int reset = 6;
+int sce = 7;
+
+int BLUE = 10;
+int RED =  8;
+int GREEN = 9;
 
 
 void setup()
@@ -44,6 +56,15 @@ void setup()
 	pid->Kp = 1;
     pid->Ki = 1;
     pid->Kd = 1;
+
+    pinMode(sclk, OUTPUT);
+    pinMode(sdin, OUTPUT); 
+    pinMode(dc, OUTPUT); 
+    pinMode(reset, OUTPUT);  
+    pinMode(sce, OUTPUT); 
+    pinMode(BLUE, OUTPUT); 
+    pinMode(RED, OUTPUT);
+    pinMode(GREEN, INPUT);
 
     PIDControlador_Init(pid);
     pantalla.begin();
