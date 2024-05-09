@@ -229,15 +229,12 @@ void enviarDatosUSART(float temperaturaOperacion, float senalControl, float temp
 
     if(Serial.available()<0){
     
-        Serial.print("T_o: ");
+        
         Serial.print(temperaturaOperacion);
-        Serial.println(" *C");
-        Serial.print("Senal: ");
+        Serial.print(",");
         Serial.print(senalControl);
-        Serial.println("*C");
-        Serial.print("T_s: ");
-        Serial.print(temperaturaSensada);
-        Serial.println(" *C "); 
+        Serial.print(",");
+        Serial.println(temperaturaSensada);
     
     }
 }
