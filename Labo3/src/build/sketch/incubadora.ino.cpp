@@ -28,10 +28,24 @@ float PIDControlador_Update(PIDControlador *pid, float setpoint, float posicion_
 
 PCD8544 pantalla;
 PIDControlador controlador;
+<<<<<<< HEAD
+int verde      = 11;
+int azul       = 12;
+int rojo       = 13;
+potenciometro  = 0;
+potenciometro1 = 0;
+int pot_pin    = A0;
+int cambio     = 8;
+int transistor = 9;
+float Kp       = 2;
+float Ki       = 5;
+float kd       = 1;
+=======
 PIDControlador *pid = &controlador;
 
 
 
+>>>>>>> 7b812936a77da2997442de154e5016aa2894186d
 float setpoint;
 float temperatura;
 float temperatura_ambiente = 25;
@@ -40,15 +54,11 @@ int baudrate = 9600;
 int potenciometro = A0;
 
 
-#line 41 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 55 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void setup();
-#line 54 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 68 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void loop();
-#line 76 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
-float PIDControlador_Update(PIDControlador *pid, float set_point, float medicion);
-#line 103 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
-float simPlanta(float Q);
-#line 41 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
+#line 55 "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/incubadora/incubadora.ino"
 void setup()
 {
 	pid->Kp = 1;
@@ -67,11 +77,58 @@ void loop()
 	pantalla.clear();
     float TempWatts = temperatura * 20.0 / 255;
     temperatura = simPlanta(TempWatts);
+<<<<<<< HEAD
+    temperatura = PIDControlador_Update(&controlador, setpoint, temperatura);
+    float senal = 1;
+    potenciometro = analogRead(pot_pin)*12/1000 +30;
+    pottenciometro1= (potenciometro-30)/12*255;
+
+     input=temp;
+    if (setpoint != potenciometro){
+    setpoint=potenciometro;     
+    }
+    senal=output/255*80;
+    analogWrite(transistor, output);
+    lcd.setCursor(0, 0);
+    lcd.print("T_o: ");
+    lcd.print(potenciometro);
+    lcd.print(" *C");
+    lcd.setCursor(0,1);
+    lcd.print("Senal: ");
+    lcd.print(senal);
+    lcd.print("*C");  
+    lcd.setCursor(0, 2);
+    lcd.print("T_s: ");
+    lcd.print(temp);
+    lcd.print(" *C ");    
+=======
     setpoint = analogRead(potenciometro)*12/1000 +30;
     temperatura = PIDControlador_Update(pid, setpoint, temperatura);
     
+>>>>>>> 7b812936a77da2997442de154e5016aa2894186d
 
+    if (temp <= 30){
+     digitalWrite(azul, HIGH);
+    }
+    else {
+        digitalWrite(azul, LOW);
+    }
+    if (temp >= 42){
+        digitalWrite(rojo, HIGH);
+    }
+    else {
+        digitalWrite(rojo, LOW);
+    }
+    if (30 <= temp <= 42){
+        digitalWrite(verde, HIGH);
+    }
+    else {
+        digitalWrite(verde, LOW);
+    }
 }
+<<<<<<< HEAD
+    delay(2000);
+=======
   
 void PIDControlador_Init(PIDControlador *pid){
 
@@ -132,3 +189,5 @@ float simPlanta(float Q) {
     return T;
 }
     
+>>>>>>> 7b812936a77da2997442de154e5016aa2894186d
+
