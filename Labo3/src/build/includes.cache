@@ -20,11 +20,6 @@
     "Includepath": null
   },
   {
-    "Sourcefile": "/home/wilberahr/Documents/Laboratorio_Microcontroladores/Labo3/src/build/sketch/simPlanta.c",
-    "Include": "",
-    "Includepath": null
-  },
-  {
     "Sourcefile": "/home/wilberahr/Arduino/libraries/PCD8544/PCD8544.cpp",
     "Include": "",
     "Includepath": null
